@@ -8,6 +8,7 @@ class Order:
         self.start = start
         self.duration = duration
         self.price = price
+        self.revenue = -1
 
 class Service():
 
@@ -72,11 +73,18 @@ class Service():
         if len(orders) == 0:
             return 0.0
         order = orders[0]
-        # doesn't work for orders with start beyond end of year
-        # see report #4807
+        if order.revenue != -1:
+            return order.revenue
+        start = order.start
+        end = start + order.duration
+        year = start // 1000
+        year_end = year * 1000 + 365
+        if end > year_end:
+            days = end - year_end
+            end = (year + 1) * 1000 + days
         l = []
         for o in orders:
-            if o.start >= order.start + order.duration:
+            if o.start >= end:
                 l.append(o)
         l2 = []
         for i in range(1,len(orders)):
@@ -86,6 +94,7 @@ class Service():
         if debug:
             fmt = "{:>10.2f}"
             print(fmt.format(max(r,r2)))
+        order.revenue = max(r, r2)
         return(max(r, r2))
 
     def computeRevenue(self,debug):
