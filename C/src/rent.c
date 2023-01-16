@@ -66,6 +66,35 @@ NODE *add_order_with_args(NODE *nodes, char *argv[], int first_arg) {
     return insert_into_orders(nodes, id, start, duration, price);
 }
 
+NODE *delete_order_with_id(NODE *nodes, char *argv[], int first_arg) {
+    char *id = argv[first_arg]; 
+    NODE *node = nodes;
+    NODE *initial = nodes;
+    NODE *prev = NULL;
+    if(node == NULL) {
+        fprintf(stderr, "file is empty\n");
+        return NULL;
+    }
+
+    while(node && strcmp(node->order->order_id, id)) { 
+        prev = node;
+        node = node->next;
+    }
+    if(node != NULL) {
+        if(prev == NULL) {
+            initial = node->next;
+        }
+        else {
+            prev->next = node->next;
+        }
+        free(node->order->order_id);
+        free(node->order);
+    } else {
+        fprintf(stderr, "%s id not found\n", id);
+    }
+    return initial;
+
+}
 void print_nodes(NODE *node) {
     int count = 0;
     while(node) {
@@ -156,6 +185,14 @@ int main(int argc, char *argv[]) {
             command = 2;
             first_arg = i+1;
         }
+        else if(!strcmp(argv[i], "-d")) {
+            if(argc < 3) {
+                fprintf(stderr, "usage: rent -d ID\n");
+                exit(1);
+            }
+            command = 3;
+            first_arg = i+1;
+        }
     }
     char *filename = getenv("LAGS_ORDER_FILE");
     if (filename == NULL) {
@@ -187,8 +224,7 @@ int main(int argc, char *argv[]) {
         printf("%d\n", revenue(nodes));
     else if (command == 0) {
         print_nodes(nodes);
-    }
-    else if (command == 2) {
+    } else if (command == 2) {
         nodes = add_order_with_args(nodes, argv, first_arg);
         file = fopen(filename, "w");
         fprintf(file, "Id,Start,Duration,Price\n");
@@ -199,7 +235,18 @@ int main(int argc, char *argv[]) {
             node = node->next;
         }
         fclose(file);
-    } 
+    } else if (command == 3) {
+        nodes = delete_order_with_id(nodes, argv, first_arg);
+        file = fopen(filename, "w");
+        fprintf(file, "Id,Start,Duration,Price\n");
+        NODE *node = nodes;
+        while(node) {
+            ORDER *o = node->order;
+            fprintf(file, "%s,%d,%d,%d\n", o->order_id, o->start, o->duration, o->price);
+            node = node->next;
+        }
+        fclose(file);
+    }
     destroy_nodes(nodes);
 }
 
