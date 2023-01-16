@@ -57,6 +57,15 @@ NODE *insert_into_orders(NODE *nodes, char *id, int start, int durn, int pr) {
     return initial;
 }
 
+void print_nodes(NODE *node) {
+    int count = 0;
+    while(node) {
+        count++;
+        ORDER *o = node->order;
+        printf("%6d %s %7d %5d %10d\n", count, o->order_id, o->start, o->duration, o->price);
+        node = node->next;
+    }
+}
 void destroy_nodes(NODE *node) {
     if(node == NULL)
         return;
@@ -123,17 +132,44 @@ int revenue(NODE *list) {
 int main(int argc, char *argv[]) {
     static char buf[MAX_BUF];
     NODE *nodes = NULL;
-    FILE *file = argc > 1 ? fopen(argv[1], "r") : stdin;
+    int command = 1;
+    for(int i=1; i<argc; i++) {
+        if(!strcmp(argv[i], "-l"))
+            command = 0;
+        else if(!strcmp(argv[i], "-r"))
+            command = 1;
+    }
+    char *filename = getenv("LAGS_ORDER_FILE");
+    if (filename == NULL) {
+        fprintf(stderr, "which file? set LAGS_ORDER_FILE var\n");
+        exit(1);
+    }
+    FILE *file = fopen(filename, "r");
+    int count = 0;
     while(fgets(buf, MAX_BUF, file)) {
-        char order_id[50];
-        int start;
-        int durn;
-        int prc;
-        sscanf(buf, "%s %d %d %d", order_id, &start, &durn, &prc);
-        nodes = insert_into_orders(nodes, order_id, start, durn, prc);
+        if(count > 0) {
+            char order_id[50];
+            int start;
+            int durn;
+            int prc;
+            char *token = strtok(buf, ",");
+            strcpy(order_id, token);
+            token = strtok(NULL, ",");
+            start = atoi(token);
+            token = strtok(NULL, ",");
+            durn = atoi(token);
+            token = strtok(NULL, ",");
+            prc = atoi(token);
+            nodes = insert_into_orders(nodes, order_id, start, durn, prc);
+        }
+        count++;
     }
     fclose(file);
-    printf("%d\n", revenue(nodes));
+    if(command)
+        printf("%d\n", revenue(nodes));
+    else {
+        print_nodes(nodes);
+    } 
     destroy_nodes(nodes);
 }
 
