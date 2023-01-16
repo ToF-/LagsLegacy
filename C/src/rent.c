@@ -57,6 +57,15 @@ NODE *insert_into_orders(NODE *nodes, char *id, int start, int durn, int pr) {
     return initial;
 }
 
+NODE *add_order_with_args(NODE *nodes, char *argv[], int first_arg) {
+    int i = first_arg;
+    char *id = argv[i++];
+    int start = atoi(argv[i++]);
+    int duration = atoi(argv[i++]);
+    int price = atoi(argv[i]);
+    return insert_into_orders(nodes, id, start, duration, price);
+}
+
 void print_nodes(NODE *node) {
     int count = 0;
     while(node) {
@@ -133,11 +142,20 @@ int main(int argc, char *argv[]) {
     static char buf[MAX_BUF];
     NODE *nodes = NULL;
     int command = 1;
+    int first_arg;
     for(int i=1; i<argc; i++) {
         if(!strcmp(argv[i], "-l"))
             command = 0;
         else if(!strcmp(argv[i], "-r"))
             command = 1;
+        else if(!strcmp(argv[i], "-a")) {
+            if(argc < 5) {
+                fprintf(stderr, "usage: rent -a ID START DURTN PRICE\n");
+                exit(1);
+            }
+            command = 2;
+            first_arg = i+1;
+        }
     }
     char *filename = getenv("LAGS_ORDER_FILE");
     if (filename == NULL) {
@@ -165,10 +183,22 @@ int main(int argc, char *argv[]) {
         count++;
     }
     fclose(file);
-    if(command)
+    if(command == 1)
         printf("%d\n", revenue(nodes));
-    else {
+    else if (command == 0) {
         print_nodes(nodes);
+    }
+    else if (command == 2) {
+        nodes = add_order_with_args(nodes, argv, first_arg);
+        file = fopen(filename, "w");
+        fprintf(file, "Id,Start,Duration,Price\n");
+        NODE *node = nodes;
+        while(node) {
+            ORDER *o = node->order;
+            fprintf(file, "%s,%d,%d,%d\n", o->order_id, o->start, o->duration, o->price);
+            node = node->next;
+        }
+        fclose(file);
     } 
     destroy_nodes(nodes);
 }
