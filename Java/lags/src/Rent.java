@@ -1,3 +1,6 @@
+import com.opencsv.CSVIterator;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
 import com.opencsv.CSVReaderHeaderAware;
 import com.opencsv.exceptions.CsvValidationException;
 
@@ -40,8 +43,21 @@ public class Rent {
             exit(1);
         }
         try {
-            Map<String, String> values = new CSVReaderHeaderAware(new FileReader(fileName)).readMap();
-            System.out.println(values);
+            CSVReader reader = new CSVReaderBuilder(new FileReader(fileName)).build();
+            CSVIterator iterator = new CSVIterator(reader);
+            boolean isFirstLine = true;
+            for (CSVIterator it = iterator; it.hasNext(); ) {
+                String[] line = it.next();
+                if(! isFirstLine) {
+                    String idt = line[0];
+                    int start = Integer.parseInt(line[1]);
+                    int durn = Integer.parseInt((line[2]));
+                    int bid = Integer.parseInt(line[3]);
+                    Order o = new Order(idt, start, durn, bid);
+                    orders.add(o);
+                }
+                isFirstLine = false;
+            }
         } catch (IOException e) {
             System.err.println("problem reading file " + fileName );
             exit(1);
