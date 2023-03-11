@@ -65,7 +65,15 @@ public class Rent {
             System.err.println("wrong csv format in file " + fileName);
             exit(1);
         }
-
+        switch (command) {
+            case 1 :
+                Lags lags = new Lags(orders);
+                int r = lags.revenue();
+                System.out.println(r);
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + command);
+        }
 
         exit(0);
     }
