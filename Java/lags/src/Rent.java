@@ -5,6 +5,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import static java.lang.System.exit;
 
@@ -28,7 +29,7 @@ public class Rent {
                     int bid = Integer.parseInt(args[i + 4]);
                     order = new Order(idt, start, durn, bid);
                 }
-            } else if (args[i].equals("-d")) if (args.length < 3) {
+            } else if (args[i].equals("-d")) if (args.length < 2) {
                 System.err.println("usage: Java Rent -d ID");
                 exit(1);
             } else {
@@ -74,29 +75,39 @@ public class Rent {
                 break;
             case 2 :
                 orders.add(order);
-                String[] line = new String[4];
-                CSVWriter writer = null;
-                try {
-                    writer = new CSVWriter(new FileWriter(fileName), CSVWriter.DEFAULT_SEPARATOR, CSVWriter.NO_QUOTE_CHARACTER, CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.RFC4180_LINE_END);
-                } catch (IOException e) {
-                    System.err.println("problem writing file: " + fileName);
-                    exit(1);
-                }
-                line = "Id,Start,Duration,Price".split(",");
-                writer.writeNext(line);
-                for (Order o : orders) {
-                    line[0] = o.getId();
-                    line[1] = String.valueOf(o.getStart());
-                    line[2] = String.valueOf(o.getDuration());
-                    line[3] = String.valueOf(o.getPrice());
-                    writer.writeNext(line);
-                }
-                writer.close();
+                saveOrders(orders, fileName);
+                break;
+            case 3 :
+                final String id = idt;
+                Predicate<Order> pr = o-> (o.getId().equals(id));
+                orders.removeIf(pr);
+                saveOrders(orders, fileName);
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + command);
         }
 
         exit(0);
+    }
+
+    private static void saveOrders(List<Order> orders, String fileName) throws IOException {
+        String[] line = new String[4];
+        CSVWriter writer = null;
+        try {
+            writer = new CSVWriter(new FileWriter(fileName), CSVWriter.DEFAULT_SEPARATOR, CSVWriter.NO_QUOTE_CHARACTER, CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.RFC4180_LINE_END);
+            line = "Id,Start,Duration,Price".split(",");
+            writer.writeNext(line);
+            for (Order o : orders) {
+                line[0] = o.getId();
+                line[1] = String.valueOf(o.getStart());
+                line[2] = String.valueOf(o.getDuration());
+                line[3] = String.valueOf(o.getPrice());
+                writer.writeNext(line);
+            }
+            writer.close();
+        } catch (IOException e) {
+            System.err.println("problem writing file: " + fileName);
+            exit(1);
+        }
     }
 }
