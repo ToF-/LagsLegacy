@@ -28,5 +28,9 @@ public class Order {
     public void setRevenue(int revenue) {
         this.revenue = revenue;
     }
+
+    public String getId() {
+        return this.id;
+    }
 }
 
