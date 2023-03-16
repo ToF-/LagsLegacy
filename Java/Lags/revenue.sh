@@ -1,1 +1,1 @@
-java -jar out/artifacts/Lags_jar/Lags.jar -r
+java -jar ../../bin/Lags.jar -r
