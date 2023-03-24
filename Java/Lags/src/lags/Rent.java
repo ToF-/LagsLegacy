@@ -1,18 +1,20 @@
+package lags;
+
 import com.opencsv.CSVIterator;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvValidationException;
+import lags.Lags;
+import lags.Order;
 
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
 
 import static java.lang.System.exit;
-
 public class Rent {
     public static void main(String[] args) throws IOException {
         int command = 1;
@@ -23,7 +25,7 @@ public class Rent {
                 command = 1;
             } else if (args[i].equals("-a")) {
                 if (args.length < 5) {
-                    System.err.println("usage: java Rent -a ID START DURTN PRICE");
+                    System.err.println("usage: java lags.Rent -a ID START DURTN PRICE");
                     exit(1);
                 } else {
                     command = 2;
@@ -35,7 +37,7 @@ public class Rent {
                 }
             } else if (args[i].equals("-d")) {
                 if (args.length < 2) {
-                    System.err.println("usage: Java Rent -d ID");
+                    System.err.println("usage: Java lags.Rent -d ID");
                     exit(1);
                 } else {
                     command = 4;
