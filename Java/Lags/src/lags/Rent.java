@@ -61,10 +61,10 @@ public class Rent {
             for (CSVIterator it = iterator; it.hasNext(); ) {
                 String[] line = it.next();
                 if(! isFirstLine) {
-                    idt = line[0];
-                    int start = Integer.parseInt(line[1]);
-                    int durn = Integer.parseInt((line[2]));
-                    int bid = Integer.parseInt(line[3]);
+                    idt = line[0].trim();
+                    int start = Integer.parseInt(line[1].trim());
+                    int durn = Integer.parseInt((line[2].trim()));
+                    int bid = Integer.parseInt(line[3].trim());
                     Order o = new Order(idt, start, durn, bid);
                     orders.add(o);
                 }
