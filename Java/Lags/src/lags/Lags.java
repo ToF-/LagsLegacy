@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.Predicate;
 
 public class Lags {
     private final List<Order> orders;
@@ -17,36 +16,10 @@ public class Lags {
         if(orders.size() == 0)
             return 0;
         Order order = orders.get(0);
+        System.out.format("%10s %10d\n", order.getId(), order.revenue);
         if(order.revenue != -1)
             return order.revenue;
-        List<Order> comp = selection(orders, order);
-        int rc = order.getPrice() + revenue_orders(comp);
-
-        List<Order> ordersMinusFirst = removeFirst(orders);
-        int rn = revenue_orders(ordersMinusFirst);
-        order.setRevenue(Math.max(rc, rn));
-        return Math.max(rc, rn);
-    }
-
-    private List<Order> removeFirst(List<Order> orders) {
-        List <Order>remove = new ArrayList(orders);
-        remove.remove(0);
-        return remove;
-    }
-
-    public int revenue() {
-        Comparator<Order> cm = new Comparator<Order>() {
-            @Override
-            public int compare(Order a, Order b) {
-                return a.getStart() - b.getStart();
-            }
-        };
-        Collections.sort(this.orders, cm);
-        return revenue_orders(this.orders);
-    }
-    private List<Order> selection(List<Order> orders, Order order) {
         List<Order>select = new ArrayList<Order>();
-
         int start = order.getStart();
         int end   = start + order.getDuration();
         int final_end;
@@ -61,6 +34,23 @@ public class Lags {
                 select.add(o);
             }
         }
-        return select;
+        List<Order> comp = select;
+        int revenueA = order.getPrice() + revenue_orders(comp);
+        List <Order>rem = new ArrayList(orders);
+        rem.remove(0);
+        int rev2 = revenue_orders(rem);
+        order.setRevenue(Math.max(revenueA, rev2));
+        return Math.max(rev2, revenueA);
+    }
+
+    public int revenue() {
+        Comparator<Order> cm = new Comparator<Order>() {
+            @Override
+            public int compare(Order a, Order b) {
+                return a.getStart() - b.getStart();
+            }
+        };
+        Collections.sort(this.orders, cm);
+        return revenue_orders(this.orders);
     }
 };

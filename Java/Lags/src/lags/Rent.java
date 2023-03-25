@@ -20,6 +20,7 @@ public class Rent {
         int command = 1;
         Order order = null;
         String idt = "";
+        String idt_ = "";
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals("-r")) {
                 command = 1;
@@ -41,7 +42,7 @@ public class Rent {
                     exit(1);
                 } else {
                     command = 4;
-                    idt = args[i + 1];
+                    idt_ = args[i + 1];
                 }
             } else if (args[i].equals("-l")) {
                 command = 3;
@@ -102,7 +103,7 @@ public class Rent {
                 }
                 break;
             case 4 :
-                final String id = idt;
+                final String id = idt_;
                 List<Order> select = new ArrayList<Order>();
                 for (Order o : orders) {
                     if(! o.getId().equals(idt)) {
